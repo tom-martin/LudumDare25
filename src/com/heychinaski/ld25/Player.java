@@ -10,9 +10,9 @@ import java.awt.event.KeyEvent;
 public class Player extends PlatformingEntity {
   
   static float WALK_SPEED = 600f;
-  static float JUMP_SPEED = 1000f;
+  static float JUMP_SPEED = GRAVITY_SPEED + 1200f;
   static float JUMP_X_SPEED = 800f;
-  static float INITIAL_JUMP_FUEL = 400f;
+  static float INITIAL_JUMP_FUEL = 700f;
   
   float jumpFuel = 0;
   private Image image;
@@ -32,8 +32,9 @@ public class Player extends PlatformingEntity {
     
     if(game.input.isKeyDown(KeyEvent.VK_Z)) {
     } else if(game.input.isKeyDown(KeyEvent.VK_SPACE) && jumpFuel > 0) {
-      float jumpValue = Math.min((tick * JUMP_SPEED), jumpFuel);
-      nextY = y - jumpValue;
+      float cost = (jumpFuel / INITIAL_JUMP_FUEL);
+      float jumpValue = Math.min((tick * JUMP_SPEED * cost), jumpFuel);
+      nextY -= jumpValue;
       jumpFuel -= jumpValue;
       
       if(game.input.isKeyDown(KeyEvent.VK_LEFT)) nextX = x - (tick * JUMP_X_SPEED); 
@@ -44,6 +45,8 @@ public class Player extends PlatformingEntity {
       if(game.input.isKeyDown(KeyEvent.VK_LEFT)) nextX = x - (tick * WALK_SPEED); 
       if(game.input.isKeyDown(KeyEvent.VK_RIGHT)) nextX = x + (tick * WALK_SPEED);
     }
+    
+    System.out.println(nextY);
   }
 
   @Override

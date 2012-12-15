@@ -9,12 +9,8 @@ public abstract class PlatformingEntity extends Entity {
 
   @Override
   public void update(float tick, Game game) {
-    // Hack, use platforms
-    if(y < game.getHeight()) {
-      nextY += GRAVITY_SPEED * tick;
-    } else {
-      nextY = game.getHeight();
-    }
+    nextY = y + (GRAVITY_SPEED * tick);
+    System.out.println(nextY);
   }
   
   @Override
