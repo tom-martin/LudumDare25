@@ -51,7 +51,11 @@ public class Player extends PlatformingEntity {
     Graphics2D g2 = (Graphics2D)g.create();
     g2.translate(round(x), round(y));
     g2.scale(direction, 1);
-    g2.drawImage(image,  round(-w/2), round(-h / 2), null);
+    
+    float wobbleY = (int)((System.currentTimeMillis() % 1600) / 100);
+    if(wobbleY > 8) wobbleY = 16 - wobbleY;
+    
+    g2.drawImage(image,  round(-w/2), round(wobbleY -(h / 2)), null);
     g2.dispose();
   }
   

@@ -159,11 +159,7 @@ public class Game extends Canvas {
     addPlatform(0, 800, 10000, 200);
     
     for(int i = 0; i < 20; i++) {
-      addPlatform((float)Math.random()*1600f, (float)Math.random()*1600f, 100, 100);
-    }
-    
-    for(int i = 0; i < 20; i++) {
-      addPlatform((float)Math.random()*1600f, 0, 100, 100);
+      addPlatform(i * 200f, (float)Math.random()*800f, 100, 100);
     }
   }
 
