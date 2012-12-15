@@ -4,13 +4,13 @@ import java.awt.geom.Rectangle2D;
 
 public abstract class PlatformingEntity extends Entity {
   public static int GRAVITY_SPEED = 800;
+  public static int GRAVITY_MAX = 40;
   
   Rectangle2D.Float intersection = new Rectangle2D.Float();
 
   @Override
   public void update(float tick, Game game) {
-    nextY = y + (GRAVITY_SPEED * tick);
-    System.out.println(nextY);
+    nextY = y + Math.min(GRAVITY_MAX, (GRAVITY_SPEED * tick));
   }
   
   @Override
