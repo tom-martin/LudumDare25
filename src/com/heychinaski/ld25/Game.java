@@ -53,6 +53,8 @@ public class Game extends Canvas {
   private LightSwitch lightSwitch;
 
   private long levelStart;
+
+  private boolean showingTitle = false;
   
   public Game() {
     setIgnoreRepaint(true);
@@ -130,20 +132,24 @@ public class Game extends Canvas {
       }
       last = now;
       
-      if(now - levelStart < 2000) ensureNotDark();
+      if(now - levelStart < 2000) {
+        ensureNotDark();
+      } else {
+        showingTitle = false;
+      }
       if(now - levelStart < 200) input.keyUp(KeyEvent.VK_SPACE);
+      
+      if(showingTitle) {
+        input.keyUp(KeyEvent.VK_SPACE);
+        input.keyUp(KeyEvent.VK_LEFT);
+        input.keyUp(KeyEvent.VK_RIGHT);
+        input.keyUp(KeyEvent.VK_Z);
+      }
       
       
       if(input.isKeyDown(KeyEvent.VK_ESCAPE)) {
         System.exit(0);
       }
-      
-      g = (Graphics2D)strategy.getDrawGraphics();
-      g = (Graphics2D) g.create();
-      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-      
-      g.setColor(Color.black);
-      g.fillRect(0, 0, getWidth(), getHeight());
       
       for(int i = 0; i < entities.size(); i++) {
         entities.get(i).update(tick, this);
@@ -165,6 +171,14 @@ public class Game extends Canvas {
       }
       
       camera.update(tick, this);
+      
+      g = (Graphics2D)strategy.getDrawGraphics();
+      g = (Graphics2D) g.create();
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+      
+      g.setColor(Color.black);
+      g.fillRect(0, 0, getWidth(), getHeight());
+      
       camera.look(g);
       
       bgTile.render(round(camera.x-300), round(camera.y-100), round(camera.x+300), round(camera.y+200), g, dark);
@@ -195,7 +209,11 @@ public class Game extends Canvas {
         if(t.scared) t.render(g, dark);
       }
       
-      if(!allTouristsScared) {
+      if(showingTitle) {
+        int startX = round(camera.x - 100);
+        int startY = round(camera.y - 50);
+        font.renderString(g, "TOURIST TRAP", startX, startY);
+      } else if(!allTouristsScared) {
         for(int i = signs.size() - 1; i >= 0; i--) {
           Sign s = signs.get(i);
           if(s.active()) {
@@ -246,6 +264,7 @@ public class Game extends Canvas {
   }
   
   public void reset() {
+    if(levelIndex == 0) showingTitle = true;
     levelStart = System.currentTimeMillis();
     entities = new ArrayList<Entity>();
     platforms = new ArrayList<Platform>();
