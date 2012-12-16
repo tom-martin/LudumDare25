@@ -4,7 +4,7 @@ import java.awt.geom.Rectangle2D;
 
 public abstract class PlatformingEntity extends Entity {
   public static int GRAVITY_SPEED = 400;
-  public static int GRAVITY_MAX = 20;
+  public static int GRAVITY_MAX = 10;
   
   Rectangle2D.Float intersection = new Rectangle2D.Float();
 

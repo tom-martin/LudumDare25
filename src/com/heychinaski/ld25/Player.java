@@ -2,7 +2,6 @@ package com.heychinaski.ld25;
 
 import static java.lang.Math.round;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.KeyEvent;

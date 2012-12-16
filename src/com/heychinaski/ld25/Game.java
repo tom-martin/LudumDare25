@@ -1,5 +1,7 @@
 package com.heychinaski.ld25;
 
+import static java.lang.Math.round;
+
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -25,6 +27,8 @@ public class Game extends Canvas {
   List<Tourist> tourists;
   List<Flash> flashes;
   CollisionManager collisionManager = new CollisionManager(this);
+  
+  BackgroundTile bgTile;
   
   float biggestTick = 0;
   
@@ -136,6 +140,8 @@ public class Game extends Canvas {
       camera.update(tick, this);
       camera.look(g);
       
+      bgTile.render(round(camera.x-300), round(camera.y-100), round(camera.x+300), round(camera.y+200), g);
+      
       for(int i = 0; i < platforms.size(); i++) {
         platforms.get(i).render(g);
       }
@@ -189,11 +195,16 @@ public class Game extends Canvas {
                                                "tourist1.png", 
                                                "tourist2.png",
                                                "brick.png",
+                                               "brick_dark.png",
                                                "flash1.png",
                                                "flash2.png",
                                                "flash3.png",
                                                "flash4.png",
-                                               "flash5.png");
+                                               "flash5.png",
+                                               "wallpaper.png",
+                                               "wallpaper2.png");
+    
+    bgTile = new BackgroundTile(imageManager.get("wallpaper.png"), imageManager.get("wallpaper2.png"));
     
     player = new Player(new Image[]{imageManager.get("ghost1.png"), imageManager.get("ghost2.png"), imageManager.get("ghost3.png"), imageManager.get("ghost2.png")},
                         new Image[]{imageManager.get("ghost_jump.png")},
