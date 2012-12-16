@@ -23,6 +23,7 @@ public class Game extends Canvas {
   List<Entity> entities;
   List<Platform> platforms;
   List<Tourist> tourists;
+  List<Flash> flashes;
   CollisionManager collisionManager = new CollisionManager(this);
   
   float biggestTick = 0;
@@ -102,8 +103,11 @@ public class Game extends Canvas {
       float tick = (float)(now - last) / 1000;
       if(tick > biggestTick) {
         biggestTick = tick;
+        System.out.println("Biggest"+(((float)1) / biggestTick));
       }
-      System.out.println(biggestTick);
+      if(System.currentTimeMillis()%100==0) {
+        System.out.println(((float)1) / tick);
+      }
       last = now;
       
       
@@ -135,18 +139,34 @@ public class Game extends Canvas {
       for(int i = 0; i < platforms.size(); i++) {
         platforms.get(i).render(g);
       }
+      
       player.render(g);
+      
+      for(int i = 0; i < flashes.size(); i++) {
+        flashes.get(i).render(g);
+      }
       
       for(int i = 0; i < tourists.size(); i++) {
         tourists.get(i).render(g);
       }
       
+      if(player.hit) player.render(g);
+      
       
       g.dispose();
       strategy.show();
       
+      if(player.hit) {
+        try {
+          Thread.sleep(500);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        reset();
+      }
+      
       try {
-        Thread.sleep(10);
+        Thread.sleep(5);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -157,33 +177,55 @@ public class Game extends Canvas {
     entities = new ArrayList<Entity>();
     platforms = new ArrayList<Platform>();
     tourists = new ArrayList<Tourist>();
-    this.imageManager = new ImageManager(this, "ghost.png", "clock.png", "flower.png", "hatstand.png", "tourist1.png", "tourist2.png");
+    flashes = new ArrayList<Flash>();
     
-    player = new Player(imageManager.get("ghost.png"), new Image[]{imageManager.get("clock.png"), imageManager.get("flower.png"), imageManager.get("hatstand.png")});
+    this.imageManager = new ImageManager(this, "ghost1.png", 
+                                               "ghost2.png", 
+                                               "ghost3.png", 
+                                               "ghost_jump.png", 
+                                               "clock.png", 
+                                               "flower.png", 
+                                               "hatstand.png", 
+                                               "tourist1.png", 
+                                               "tourist2.png",
+                                               "brick.png",
+                                               "flash1.png",
+                                               "flash2.png",
+                                               "flash3.png",
+                                               "flash4.png",
+                                               "flash5.png");
+    
+    player = new Player(new Image[]{imageManager.get("ghost1.png"), imageManager.get("ghost2.png"), imageManager.get("ghost3.png"), imageManager.get("ghost2.png")},
+                        new Image[]{imageManager.get("ghost_jump.png")},
+                        new Image[]{imageManager.get("clock.png"), imageManager.get("flower.png"), imageManager.get("hatstand.png")});
     camera = new EntityTrackingCamera(player, this);
     
     player.x = 0;
-    player.y = 0;
-    player.w = 32;
-    player.h = 64;
+    player.nextY = 600;
+    player.w = 16;
+    player.h = 32;
     
-    
-    entities.add(player);
     
     addPlatform(0, 800, 10000, 200);
     
     for(int i = 0; i < 20; i++) {
-      addPlatform(i * 200f, (float)Math.random()*800f, 100, 100);
+      addPlatform(i * 100f, ((float)Math.random()*300f) + 300f, 64, 64);
     }
     
-    for(int i = 0; i < 5; i++) {
+    for(int i = 1; i < 5; i++) {
       float x = i * 200f;
       addTourist(x, 0f, x - 100, x + 100);
+    }
+    
+    entities.add(player);
+    
+    for(int i = 0; i < entities.size(); i++) {
+      entities.get(i).applyNext();
     }
   }
 
   private void addPlatform(float x, float y, float w, float h) {
-    Platform platform = new Platform();
+    Platform platform = new Platform(imageManager.get("brick.png"));
     platform.nextX = x;
     platform.nextY = y;
     platform.w = w;
@@ -196,10 +238,28 @@ public class Game extends Canvas {
     PatrollingTourist t = new PatrollingTourist(new Image[] {imageManager.get("tourist1.png"), imageManager.get("tourist2.png")}, left, right);
     t.nextX = x;
     t.nextY = y;
-    t.w = 32;
-    t.h = 64;
+    t.w = 16;
+    t.h = 32;
     tourists.add(t);
     entities.add(t);
+    addFlash(t);
+  }
+  
+  private void addFlash(PatrollingTourist tourist) {
+    Flash f = new Flash(new Image[]{imageManager.get("flash1.png"),
+                                    imageManager.get("flash2.png"),
+                                    imageManager.get("flash3.png"), 
+                                    imageManager.get("flash4.png"), 
+                                    imageManager.get("flash5.png"),
+                                    imageManager.get("flash4.png"),
+                                    imageManager.get("flash3.png"), 
+                                    imageManager.get("flash2.png"),}, imageManager.get("flash5.png"), tourist);
+    f.nextX = tourist.nextX;
+    f.nextY = tourist.nextY;
+    f.w = 32;
+    f.h = 32;
+    flashes.add(f);
+    entities.add(f);
   }
 
 }

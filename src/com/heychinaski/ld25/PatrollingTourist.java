@@ -9,6 +9,7 @@ public class PatrollingTourist extends Tourist {
   float left, right;
   int direction = 1;
   Image[] walkImages;
+  boolean caughtPlayer = false;
   
   static float WALK_SPEED = 30f;
   
@@ -20,16 +21,18 @@ public class PatrollingTourist extends Tourist {
   
   @Override
   public void update(float tick, Game game) {
-    super.update(tick, game);
-    nextX = x + (direction * tick * WALK_SPEED);
-    
-    if(nextX < left) {
-      nextX = left;
-      direction = 1;
-    }
-    if(nextX > right) {
-      nextX = right;
-      direction = -1;
+    if(!caughtPlayer) {
+      super.update(tick, game);
+      nextX = x + (direction * tick * WALK_SPEED);
+      
+      if(nextX < left) {
+        nextX = left;
+        direction = 1;
+      }
+      if(nextX > right) {
+        nextX = right;
+        direction = -1;
+      }
     }
   }
 
@@ -39,8 +42,12 @@ public class PatrollingTourist extends Tourist {
     g2.translate(round(x), round(y));
     g2.scale(direction, 1);
     
-    int imageIndex = (int)((System.currentTimeMillis() / 500) % walkImages.length);
+    int imageIndex = caughtPlayer ? 0 : (int)((System.currentTimeMillis() / 250) % walkImages.length);
     g2.drawImage(walkImages[imageIndex],  round(-w/2), round(-h / 2), null);
     g2.dispose();
+  }
+  
+  public void successfulHit() {
+    caughtPlayer = true;
   }
 }

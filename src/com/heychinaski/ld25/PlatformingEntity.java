@@ -3,8 +3,8 @@ package com.heychinaski.ld25;
 import java.awt.geom.Rectangle2D;
 
 public abstract class PlatformingEntity extends Entity {
-  public static int GRAVITY_SPEED = 800;
-  public static int GRAVITY_MAX = 40;
+  public static int GRAVITY_SPEED = 400;
+  public static int GRAVITY_MAX = 20;
   
   Rectangle2D.Float intersection = new Rectangle2D.Float();
 

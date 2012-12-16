@@ -6,7 +6,7 @@ public abstract class Camera extends Entity {
 
   Game game;
   
-  float zoom = 2;
+  float zoom = 4;
 
   public Camera(Game game) {
     this.game = game;

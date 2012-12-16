@@ -5,23 +5,31 @@ import static java.lang.Math.round;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Rectangle2D;
 
 public class Player extends PlatformingEntity {
   
-  static float WALK_SPEED = 200f;
-  static float JUMP_SPEED = GRAVITY_SPEED + 1200f;
-  static float JUMP_X_SPEED = 300f;
-  static float INITIAL_JUMP_FUEL = 700f;
+  static float WALK_SPEED = 100f;
+  static float JUMP_SPEED = GRAVITY_SPEED + 600f;
+  static float JUMP_X_SPEED = 150f;
+  static float INITIAL_JUMP_FUEL = 350f;
   
   float jumpFuel = 0;
-  private Image image;
   
   int direction = 1;
   private int hidingIndex = -1;
   private Image[] hideImages;
+  private Image[] imageCycle;
+  private Image[] jumpCycle;
+  private boolean jumping = false;
   
-  public Player(Image image, Image hideImages[]) {
-    this.image = image; 
+  boolean hit = false;
+  
+  private long lastHide = -1;
+  
+  public Player(Image[] imageCycle, Image[] jumpCycle, Image hideImages[]) {
+    this.imageCycle = imageCycle; 
+    this.jumpCycle = jumpCycle;
     this.hideImages = hideImages;
   }
   
@@ -29,12 +37,16 @@ public class Player extends PlatformingEntity {
   public void update(float tick, Game game) {
     super.update(tick, game);
     
+    if(hit) return;
+    
     if(game.input.isKeyDown(KeyEvent.VK_LEFT)) direction = -1;
     if(game.input.isKeyDown(KeyEvent.VK_RIGHT)) direction = 1;
     
     if(game.input.isKeyDown(KeyEvent.VK_Z)) {
-      if(hidingIndex  == -1) {
+      if(hidingIndex  == -1  &&
+          (lastHide == -1 || (System.currentTimeMillis() - lastHide > 1000)) ) {
         hidingIndex = (int)(Math.random() * hideImages.length);
+        lastHide = System.currentTimeMillis();
       }
       
       return;
@@ -43,6 +55,7 @@ public class Player extends PlatformingEntity {
     hidingIndex = -1;
     
     if(game.input.isKeyDown(KeyEvent.VK_SPACE) && jumpFuel > 0) {
+      jumping = true;
       float cost = (jumpFuel / INITIAL_JUMP_FUEL);
       float jumpValue = Math.min((tick * JUMP_SPEED * cost), jumpFuel);
       nextY -= jumpValue;
@@ -51,6 +64,7 @@ public class Player extends PlatformingEntity {
       if(game.input.isKeyDown(KeyEvent.VK_LEFT)) nextX = x - (tick * JUMP_X_SPEED); 
       if(game.input.isKeyDown(KeyEvent.VK_RIGHT)) nextX = x + (tick * JUMP_X_SPEED);
     } else {
+      jumping = false;
       jumpFuel = 0;
       
       if(game.input.isKeyDown(KeyEvent.VK_LEFT)) nextX = x - (tick * WALK_SPEED); 
@@ -64,14 +78,22 @@ public class Player extends PlatformingEntity {
     g2.translate(round(x), round(y));
     if(hidingIndex == -1) {
       g2.scale(direction, 1);
-      float wobbleY = (int)((System.currentTimeMillis() % 1600) / 100);
-      if(wobbleY > 8) wobbleY = 16 - wobbleY;
-      
-      g2.drawImage(image,  round(-w/2), round(wobbleY -(h / 2)), null);
+      Image[] images = jumping || hit ? jumpCycle : imageCycle;
+      int imageIndex = (int)((System.currentTimeMillis() / 200) % images.length);
+      g2.drawImage(images[imageIndex],  round(-w/2), round(-h / 2), null);
     } else {
       g2.drawImage(hideImages[hidingIndex],  round(-w/2), round(-(h / 2)), null);
     }
     g2.dispose();
+  }
+  
+  @Override
+  public void collided(Entity with, float tick, Game game, Rectangle2D.Float bounds, Rectangle2D.Float nextBounds, Rectangle2D.Float withBounds) {
+    super.collided(with, tick, game, bounds, nextBounds, withBounds);
+    if(with instanceof Flash && hidingIndex == -1) {
+      hit = true;
+      ((Flash)with).successfulHit();
+    }
   }
   
   public void stoodOn(Platform platform) {

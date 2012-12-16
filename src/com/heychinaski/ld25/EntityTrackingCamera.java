@@ -15,7 +15,7 @@ public class EntityTrackingCamera extends Camera {
   @Override
   public void update(float tick, Game game) {
     this.x = toTrack.x;
-    this.y = toTrack.y;
+    this.y = toTrack.y - 50;
   }
 
   @Override
