@@ -81,7 +81,7 @@ public class Player extends PlatformingEntity {
       int imageIndex = (int)((System.currentTimeMillis() / 200) % images.length);
       g2.drawImage(images[imageIndex],  round(-w/2), heightFudge + round(-h / 2), null);
     } else {
-      g2.drawImage(hideImages[hidingIndex],  round(-w/2), round(-(h / 2)), null);
+      g2.drawImage(hideImages[hidingIndex],  round(-w/2), round(-(h / 2) - 16), null);
     }
 //    g2.setColor(Color.red);
 //    g2.drawRect(round(-w/2), round(-h / 2), round(w), round(h));
