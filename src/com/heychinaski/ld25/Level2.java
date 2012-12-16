@@ -17,7 +17,7 @@ public class Level2 extends Level {
     
     
     tourists = new ArrayList<Rectangle2D.Float>();
-    tourists.add(rect(128, -32, 320, -32));
+    tourists.add(rect(160, -32, 320, -32));
     
     lightSwitch = new Point2D.Float(412, -16);
     signs = new ArrayList<Sign>();

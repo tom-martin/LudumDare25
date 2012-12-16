@@ -59,10 +59,13 @@ public class Player extends PlatformingEntity {
         hidingIndex = (int)(Math.random() * hideImages.length);
       }
       
-      return;
+   // CHEAT MODE!
+      if(!game.input.isKeyDown(KeyEvent.VK_D)) {
+       return;
+      }
     }
     
-    hidingIndex = -1;
+    if(!game.input.isKeyDown(KeyEvent.VK_D)) hidingIndex = -1;
     
     if(game.input.isKeyDown(KeyEvent.VK_SPACE) && jumpFuel > 0) {
       jumping = true;

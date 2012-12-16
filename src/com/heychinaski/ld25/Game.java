@@ -21,6 +21,8 @@ import java.util.List;
 
 public class Game extends Canvas {
   private static final long serialVersionUID = 1L;
+
+  private static final int MAX_LEVEL_INDEX = 5;
   
   Input input = new Input();
   Player player;
@@ -49,6 +51,8 @@ public class Game extends Canvas {
   long finishTime = -1;
 
   private LightSwitch lightSwitch;
+
+  private long levelStart;
   
   public Game() {
     setIgnoreRepaint(true);
@@ -126,6 +130,9 @@ public class Game extends Canvas {
       }
       last = now;
       
+      if(now - levelStart < 2000) ensureNotDark();
+      if(now - levelStart < 200) input.keyUp(KeyEvent.VK_SPACE);
+      
       
       if(input.isKeyDown(KeyEvent.VK_ESCAPE)) {
         System.exit(0);
@@ -199,7 +206,16 @@ public class Game extends Canvas {
       } else {
         int startX = round(camera.x - 100);
         int startY = round(camera.y - 50);
-        font.renderString(g, "LEVEL COMPLETE!", startX, startY + (10));  
+        
+        if(levelIndex < MAX_LEVEL_INDEX) {
+          font.renderString(g, "LEVEL COMPLETE!", startX, startY + (10));
+          font.renderString(g, "PRESS SPACE TO", startX, startY + (20));
+          font.renderString(g, "CONTINUE.", startX, startY + (30));
+        } else {
+          font.renderString(g, "GAME COMPLETE!", startX, startY + (10));
+          font.renderString(g, "PRESS SPACE TO", startX, startY + (20));
+          font.renderString(g, "PLAY AGAIN!", startX, startY + (30));
+        }
       }
       
       g.dispose();
@@ -213,8 +229,11 @@ public class Game extends Canvas {
         finishTime = System.currentTimeMillis();
       }
       
-      if(allTouristsScared && (System.currentTimeMillis() - finishTime) > 5000) {
+      if(allTouristsScared && (System.currentTimeMillis() - finishTime) > 500 && input.isKeyDown(KeyEvent.VK_SPACE)) {
         levelIndex++;
+        if(levelIndex > MAX_LEVEL_INDEX) {
+          levelIndex = 0;
+        }
         reset();
       }
       
@@ -227,6 +246,7 @@ public class Game extends Canvas {
   }
   
   public void reset() {
+    levelStart = System.currentTimeMillis();
     entities = new ArrayList<Entity>();
     platforms = new ArrayList<Platform>();
     tourists = new ArrayList<Tourist>();
@@ -386,10 +406,12 @@ public class Game extends Canvas {
   
   private Level newLevelForIndex() {
     switch(levelIndex) {
-     case 0: return new Level3();
-     case 1: return new Level1();
-     case 2: return new Level2();
-     case 3: return new Level3();
+     case 0: return new Level1();
+     case 1: return new Level2();
+     case 2: return new Level3();
+     case 3: return new Level4();
+     case 4: return new Level5();
+     case 5: return new Level6();
      default: return null;
     }
   }

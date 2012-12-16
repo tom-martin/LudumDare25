@@ -10,7 +10,7 @@ public class Font {
   
   String row1 = "ABCDEFGHIJKL";
   String row2 = "MNOPQRSTUVWX";
-  String row3 = "YZ.,!";
+  String row3 = "YZ.,!'";
 
   public Font(Image image) {
     super();
