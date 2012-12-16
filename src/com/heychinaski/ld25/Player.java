@@ -26,6 +26,7 @@ public class Player extends PlatformingEntity {
   boolean hit = false;
   private Image[] darkImageCycle;
   private Image[] darkJumpCycle;
+  long hitTime;
   
   public Player(Image[] imageCycle, Image[] jumpCycle, Image hideImages[], Image[] darkImageCycle, Image[] darkJumpCycle) {
     this.imageCycle = imageCycle;
@@ -41,7 +42,14 @@ public class Player extends PlatformingEntity {
     
     if(game.dark) h = 32;
     
-    if(hit) return;
+    
+    if(y > 1600 && !hit){
+      hit = true;
+      hitTime = System.currentTimeMillis();
+    }
+    if(hit) {
+      return;
+    }
     
     if(game.input.isKeyDown(KeyEvent.VK_LEFT)) direction = -1;
     if(game.input.isKeyDown(KeyEvent.VK_RIGHT)) direction = 1;
@@ -78,13 +86,16 @@ public class Player extends PlatformingEntity {
   public void render(Graphics2D g, boolean dark) {
     Image[] ic = dark ? darkImageCycle : imageCycle;
     Image[] jic = dark ? darkJumpCycle : jumpCycle;
+    ic = hit ? jumpCycle : ic;
+    
+    if(hit && (System.currentTimeMillis() / 500) % 2 == 0) return;
     
     Graphics2D g2 = (Graphics2D)g.create();
     g2.translate(round(x), round(y));
     if(hidingIndex == -1) {
       g2.scale(direction, 1);
-      Image[] images = jumping || hit ? jic : ic;
-      int heightFudge = jumping || hit || dark ? 0 : -16;
+      Image[] images = jumping ? jic : ic;
+      int heightFudge = jumping || dark ? 0 : -16;
       
       int imageIndex = (int)((System.currentTimeMillis() / 200) % images.length);
       g2.drawImage(images[imageIndex],  round(-w/2), heightFudge + round(-h / 2), null);
@@ -100,8 +111,11 @@ public class Player extends PlatformingEntity {
   public void collided(Entity with, float tick, Game game, Rectangle2D.Float bounds, Rectangle2D.Float nextBounds, Rectangle2D.Float withBounds) {
     super.collided(with, tick, game, bounds, nextBounds, withBounds);
     if(with instanceof Flash && hidingIndex == -1 && !game.dark) {
-      hit = true;
-      ((Flash)with).successfulHit();
+      if(!hit) {
+        hit = true;
+        ((Flash)with).successfulHit();
+        hitTime = System.currentTimeMillis();
+      }
     } else if(with instanceof LightSwitch) {
       if(!game.dark) {
         nextY -= 16;

@@ -170,12 +170,7 @@ public class Game extends Canvas {
       g.dispose();
       strategy.show();
       
-      if(player.hit) {
-        try {
-          Thread.sleep(500);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
+      if(player.hit && (System.currentTimeMillis() - player.hitTime) > 2000 ) {
         reset();
       }
       
@@ -239,7 +234,7 @@ public class Game extends Canvas {
     player.h = 16;
     
     
-    addPlatform(0, 896, 10000, 128);
+//    addPlatform(0, 896, 10000, 128);
     
     float y = 800f;
     addPlatform(0, y, 64, 64);
