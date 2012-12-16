@@ -203,7 +203,7 @@ public class Game extends Canvas {
     player.x = 0;
     player.nextY = 600;
     player.w = 16;
-    player.h = 32;
+    player.h = 16;
     
     
     addPlatform(0, 896, 10000, 128);

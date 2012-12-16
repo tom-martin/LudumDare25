@@ -2,6 +2,7 @@ package com.heychinaski.ld25;
 
 import static java.lang.Math.round;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
@@ -75,11 +76,15 @@ public class Player extends PlatformingEntity {
     if(hidingIndex == -1) {
       g2.scale(direction, 1);
       Image[] images = jumping || hit ? jumpCycle : imageCycle;
+      int heightFudge = jumping || hit ? 0 : -16;
+      
       int imageIndex = (int)((System.currentTimeMillis() / 200) % images.length);
-      g2.drawImage(images[imageIndex],  round(-w/2), round(-h / 2), null);
+      g2.drawImage(images[imageIndex],  round(-w/2), heightFudge + round(-h / 2), null);
     } else {
       g2.drawImage(hideImages[hidingIndex],  round(-w/2), round(-(h / 2)), null);
     }
+//    g2.setColor(Color.red);
+//    g2.drawRect(round(-w/2), round(-h / 2), round(w), round(h));
     g2.dispose();
   }
   
