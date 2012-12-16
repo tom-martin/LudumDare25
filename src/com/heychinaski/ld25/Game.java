@@ -28,7 +28,9 @@ public class Game extends Canvas {
   List<Platform> platforms;
   List<Tourist> tourists;
   List<Flash> flashes;
+  List<Sign> signs;
   CollisionManager collisionManager = new CollisionManager(this);
+  Font font;
   
   int levelIndex = 0; 
   
@@ -43,6 +45,8 @@ public class Game extends Canvas {
   ImageManager imageManager;
 
   boolean dark = false;
+  
+  long finishTime = -1;
 
   private LightSwitch lightSwitch;
   
@@ -144,6 +148,15 @@ public class Game extends Canvas {
         entities.get(i).applyNext();
       }
       
+      boolean allTouristsScared = true;
+      for(int i = 0; i < tourists.size(); i++) {
+        Tourist t = tourists.get(i);
+        if(!t.scared) {
+          allTouristsScared = false;
+          break;
+        }
+      }
+      
       camera.update(tick, this);
       camera.look(g);
       
@@ -152,6 +165,11 @@ public class Game extends Canvas {
       for(int i = 0; i < platforms.size(); i++) {
         platforms.get(i).render(g, dark);
       }
+      
+      for(int i = 0; i < signs.size(); i++) {
+        signs.get(i).render(g, dark );
+      }
+      
       lightSwitch.render(g, dark);
       player.render(g, dark);
       
@@ -170,6 +188,20 @@ public class Game extends Canvas {
         if(t.scared) t.render(g, dark);
       }
       
+      if(!allTouristsScared) {
+        for(int i = signs.size() - 1; i >= 0; i--) {
+          Sign s = signs.get(i);
+          if(s.active()) {
+            s.renderMessage(g, camera, dark);
+            break;
+          }
+        }
+      } else {
+        int startX = round(camera.x - 100);
+        int startY = round(camera.y - 50);
+        font.renderString(g, "LEVEL COMPLETE!", startX, startY + (10));  
+      }
+      
       g.dispose();
       strategy.show();
       
@@ -177,17 +209,11 @@ public class Game extends Canvas {
         reset();
       }
 
-      boolean allTouristsScared = true;
-      for(int i = 0; i < tourists.size(); i++) {
-        Tourist t = tourists.get(i);
-        if(!t.scared) {
-          allTouristsScared = false;
-          break;
-        }
+      if(allTouristsScared && finishTime == -1) {
+        finishTime = System.currentTimeMillis();
       }
       
-      if(allTouristsScared) {
-        // TODO give it a second!
+      if(allTouristsScared && (System.currentTimeMillis() - finishTime) > 5000) {
         levelIndex++;
         reset();
       }
@@ -205,8 +231,10 @@ public class Game extends Canvas {
     platforms = new ArrayList<Platform>();
     tourists = new ArrayList<Tourist>();
     flashes = new ArrayList<Flash>();
+    signs = new ArrayList<Sign>();
     
     ensureNotDark();
+    finishTime = -1;
     
     Level level = newLevelForIndex();
     
@@ -242,7 +270,9 @@ public class Game extends Canvas {
                                                "wallpaper2.png",
                                                "wallpaper_dark.png",
                                                "switch.png",
-                                               "switch_dark.png");
+                                               "switch_dark.png",
+                                               "font.png",
+                                               "sign.png");
     
     bgTile = new BackgroundTile(imageManager.get("wallpaper.png"), imageManager.get("wallpaper2.png"), imageManager.get("wallpaper_dark.png"), imageManager.get("wallpaper_dark.png"));
     
@@ -252,6 +282,8 @@ public class Game extends Canvas {
                         new Image[]{imageManager.get("ghost1_dark.png"), imageManager.get("ghost2_dark.png"), imageManager.get("ghost3_dark.png"), imageManager.get("ghost2_dark.png")},
                         new Image[]{imageManager.get("ghost_jump_dark.png")});
     camera = new EntityTrackingCamera(player, this);
+    
+    font = new Font(imageManager.get("font.png"));
     
     Point2D.Float playerLoc = level.playerStart;
     player.x = playerLoc.x;
@@ -269,6 +301,15 @@ public class Game extends Canvas {
     for(int i = 0; i < levelTourists.size(); i++) {
       Rectangle2D.Float r = levelTourists.get(i);
       addTourist((float)r.getCenterX(), r.y, r.x, (float)r.getMaxX());
+    }
+    
+    for(int i = 0; i < level.signs.size(); i++) {
+      Sign sign = level.signs.get(i);
+      Sign newSign = new Sign(round(sign.nextX), round(sign.nextY), sign.message, sign.darkMessage);
+      newSign.font = font;
+      newSign.image = imageManager.get("sign.png");
+      signs.add(newSign);
+      entities.add(newSign);
     }
     
     entities.add(player);
@@ -345,8 +386,10 @@ public class Game extends Canvas {
   
   private Level newLevelForIndex() {
     switch(levelIndex) {
-     case 0: return new Level1();
+     case 0: return new Level3();
      case 1: return new Level1();
+     case 2: return new Level2();
+     case 3: return new Level3();
      default: return null;
     }
   }

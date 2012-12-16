@@ -43,7 +43,7 @@ public class Player extends PlatformingEntity {
     if(game.dark) h = 32;
     
     
-    if(y > 1600 && !hit){
+    if(y > 200 && !hit){
       hit = true;
       hitTime = System.currentTimeMillis();
     }
