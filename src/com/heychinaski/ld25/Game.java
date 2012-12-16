@@ -206,15 +206,19 @@ public class Game extends Canvas {
     player.h = 32;
     
     
-    addPlatform(0, 800, 10000, 200);
+    addPlatform(0, 896, 10000, 128);
     
-    for(int i = 0; i < 20; i++) {
-      addPlatform(i * 100f, ((float)Math.random()*300f) + 300f, 64, 64);
+    float y = 800f;
+    addPlatform(0, y, 64, 64);
+    for(int i = 1; i < 20; i++) {
+      y +=((float)Math.random()*128f) - 64;
+      y = Math.min(y, 768);
+      addPlatform(i * 128, y, 64, 64);
     }
     
     for(int i = 1; i < 5; i++) {
-      float x = i * 200f;
-      addTourist(x, 0f, x - 100, x + 100);
+      float x = i * 256f;
+      addTourist(x, 0f, x - 32, x + 32);
     }
     
     entities.add(player);

@@ -25,8 +25,6 @@ public class Player extends PlatformingEntity {
   
   boolean hit = false;
   
-  private long lastHide = -1;
-  
   public Player(Image[] imageCycle, Image[] jumpCycle, Image hideImages[]) {
     this.imageCycle = imageCycle; 
     this.jumpCycle = jumpCycle;
@@ -43,10 +41,8 @@ public class Player extends PlatformingEntity {
     if(game.input.isKeyDown(KeyEvent.VK_RIGHT)) direction = 1;
     
     if(game.input.isKeyDown(KeyEvent.VK_Z)) {
-      if(hidingIndex  == -1  &&
-          (lastHide == -1 || (System.currentTimeMillis() - lastHide > 1000)) ) {
+      if(hidingIndex  == -1) {
         hidingIndex = (int)(Math.random() * hideImages.length);
-        lastHide = System.currentTimeMillis();
       }
       
       return;
