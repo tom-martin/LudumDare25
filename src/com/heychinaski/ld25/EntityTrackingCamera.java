@@ -19,7 +19,7 @@ public class EntityTrackingCamera extends Camera {
   }
 
   @Override
-  public void render(Graphics2D g) {}
+  public void render(Graphics2D g, boolean dark) {}
 
   @Override
   public void collided(Entity with, float tick, Game game, Rectangle2D.Float bounds, Rectangle2D.Float nextBounds, Rectangle2D.Float withBounds) {

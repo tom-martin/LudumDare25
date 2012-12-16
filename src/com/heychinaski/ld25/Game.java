@@ -37,6 +37,10 @@ public class Game extends Canvas {
   boolean running = true;
 
   ImageManager imageManager;
+
+  boolean dark = false;
+
+  private LightSwitch lightSwitch;
   
   public Game() {
     setIgnoreRepaint(true);
@@ -120,7 +124,6 @@ public class Game extends Canvas {
       }
       
       g = (Graphics2D)strategy.getDrawGraphics();
-      Graphics2D orig = g;
       g = (Graphics2D) g.create();
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
       
@@ -140,23 +143,28 @@ public class Game extends Canvas {
       camera.update(tick, this);
       camera.look(g);
       
-      bgTile.render(round(camera.x-300), round(camera.y-100), round(camera.x+300), round(camera.y+200), g);
+      bgTile.render(round(camera.x-300), round(camera.y-100), round(camera.x+300), round(camera.y+200), g, dark);
       
       for(int i = 0; i < platforms.size(); i++) {
-        platforms.get(i).render(g);
+        platforms.get(i).render(g, dark);
       }
-      
-      player.render(g);
+      lightSwitch.render(g, dark);
+      player.render(g, dark);
       
       for(int i = 0; i < flashes.size(); i++) {
-        flashes.get(i).render(g);
+        flashes.get(i).render(g, dark );
       }
       
       for(int i = 0; i < tourists.size(); i++) {
-        tourists.get(i).render(g);
+        tourists.get(i).render(g, dark);
       }
       
-      if(player.hit) player.render(g);
+      if(player.hit || dark) player.render(g, dark);
+      
+      for(int i = 0; i < tourists.size(); i++) {
+        Tourist t = tourists.get(i);
+        if(t.scared) t.render(g, dark);
+      }
       
       
       g.dispose();
@@ -187,13 +195,22 @@ public class Game extends Canvas {
     
     this.imageManager = new ImageManager(this, "ghost1.png", 
                                                "ghost2.png", 
-                                               "ghost3.png", 
-                                               "ghost_jump.png", 
+                                               "ghost3.png",
+                                               "ghost1_dark.png", 
+                                               "ghost2_dark.png", 
+                                               "ghost3_dark.png",
+                                               "ghost_jump.png",
+                                               "ghost_jump_dark.png",
                                                "clock.png", 
                                                "flower.png", 
                                                "hatstand.png", 
                                                "tourist1.png", 
                                                "tourist2.png",
+                                               "tourist1_dark.png",
+                                               "tourist2_dark.png",
+                                               "tourist3_dark.png",
+                                               "tourist_scared1.png",
+                                               "tourist_scared2.png",
                                                "brick.png",
                                                "brick_dark.png",
                                                "flash1.png",
@@ -202,13 +219,18 @@ public class Game extends Canvas {
                                                "flash4.png",
                                                "flash5.png",
                                                "wallpaper.png",
-                                               "wallpaper2.png");
+                                               "wallpaper2.png",
+                                               "wallpaper_dark.png",
+                                               "switch.png",
+                                               "switch_dark.png");
     
-    bgTile = new BackgroundTile(imageManager.get("wallpaper.png"), imageManager.get("wallpaper2.png"));
+    bgTile = new BackgroundTile(imageManager.get("wallpaper.png"), imageManager.get("wallpaper2.png"), imageManager.get("wallpaper_dark.png"), imageManager.get("wallpaper_dark.png"));
     
     player = new Player(new Image[]{imageManager.get("ghost1.png"), imageManager.get("ghost2.png"), imageManager.get("ghost3.png"), imageManager.get("ghost2.png")},
                         new Image[]{imageManager.get("ghost_jump.png")},
-                        new Image[]{imageManager.get("clock.png"), imageManager.get("flower.png"), imageManager.get("hatstand.png")});
+                        new Image[]{imageManager.get("clock.png"), imageManager.get("flower.png"), imageManager.get("hatstand.png")},
+                        new Image[]{imageManager.get("ghost1_dark.png"), imageManager.get("ghost2_dark.png"), imageManager.get("ghost3_dark.png"), imageManager.get("ghost2_dark.png")},
+                        new Image[]{imageManager.get("ghost_jump_dark.png")});
     camera = new EntityTrackingCamera(player, this);
     
     player.x = 0;
@@ -237,10 +259,13 @@ public class Game extends Canvas {
     for(int i = 0; i < entities.size(); i++) {
       entities.get(i).applyNext();
     }
+    
+    setLightSwitch(128, 736);
+    ensureNotDark();
   }
 
   private void addPlatform(float x, float y, float w, float h) {
-    Platform platform = new Platform(imageManager.get("brick.png"));
+    Platform platform = new Platform(imageManager.get("brick.png"), imageManager.get("brick_dark.png"));
     platform.nextX = x;
     platform.nextY = y;
     platform.w = w;
@@ -250,7 +275,10 @@ public class Game extends Canvas {
   }
   
   private void addTourist(float x, float y, float left, float right) {
-    PatrollingTourist t = new PatrollingTourist(new Image[] {imageManager.get("tourist1.png"), imageManager.get("tourist2.png")}, left, right);
+    PatrollingTourist t = new PatrollingTourist(new Image[] {imageManager.get("tourist1.png"), imageManager.get("tourist2.png")},
+                                                new Image[] {imageManager.get("tourist1_dark.png"), imageManager.get("tourist2_dark.png"), imageManager.get("tourist3_dark.png"), imageManager.get("tourist2_dark.png")}, 
+                                                new Image[] {imageManager.get("tourist_scared1.png"), imageManager.get("tourist_scared2.png")},
+                                                left, right);
     t.nextX = x;
     t.nextY = y;
     t.w = 16;
@@ -258,6 +286,15 @@ public class Game extends Canvas {
     tourists.add(t);
     entities.add(t);
     addFlash(t);
+  }
+  
+  private void setLightSwitch(float x, float y) {
+    lightSwitch = new LightSwitch(imageManager.get("switch.png"), imageManager.get("switch_dark.png"));
+    lightSwitch.nextX = x;
+    lightSwitch.nextY = y;
+    lightSwitch.w = 16;
+    lightSwitch.h = 32;
+    entities.add(lightSwitch);
   }
   
   private void addFlash(PatrollingTourist tourist) {
@@ -275,6 +312,18 @@ public class Game extends Canvas {
     f.h = 32;
     flashes.add(f);
     entities.add(f);
+  }
+
+  public void ensureDark() {
+    if(!dark) {
+      dark = true;
+    }
+  }
+  
+  public void ensureNotDark() {
+    if(dark) {
+      dark = false;
+    }
   }
 
 }

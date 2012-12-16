@@ -24,10 +24,14 @@ public class Player extends PlatformingEntity {
   private boolean jumping = false;
   
   boolean hit = false;
+  private Image[] darkImageCycle;
+  private Image[] darkJumpCycle;
   
-  public Player(Image[] imageCycle, Image[] jumpCycle, Image hideImages[]) {
-    this.imageCycle = imageCycle; 
+  public Player(Image[] imageCycle, Image[] jumpCycle, Image hideImages[], Image[] darkImageCycle, Image[] darkJumpCycle) {
+    this.imageCycle = imageCycle;
+    this.darkImageCycle = darkImageCycle;
     this.jumpCycle = jumpCycle;
+    this.darkJumpCycle = darkJumpCycle;
     this.hideImages = hideImages;
   }
   
@@ -35,12 +39,14 @@ public class Player extends PlatformingEntity {
   public void update(float tick, Game game) {
     super.update(tick, game);
     
+    if(game.dark) h = 32;
+    
     if(hit) return;
     
     if(game.input.isKeyDown(KeyEvent.VK_LEFT)) direction = -1;
     if(game.input.isKeyDown(KeyEvent.VK_RIGHT)) direction = 1;
     
-    if(game.input.isKeyDown(KeyEvent.VK_Z)) {
+    if(game.input.isKeyDown(KeyEvent.VK_Z) && !game.dark) {
       if(hidingIndex  == -1) {
         hidingIndex = (int)(Math.random() * hideImages.length);
       }
@@ -69,13 +75,16 @@ public class Player extends PlatformingEntity {
   }
 
   @Override
-  public void render(Graphics2D g) {
+  public void render(Graphics2D g, boolean dark) {
+    Image[] ic = dark ? darkImageCycle : imageCycle;
+    Image[] jic = dark ? darkJumpCycle : jumpCycle;
+    
     Graphics2D g2 = (Graphics2D)g.create();
     g2.translate(round(x), round(y));
     if(hidingIndex == -1) {
       g2.scale(direction, 1);
-      Image[] images = jumping || hit ? jumpCycle : imageCycle;
-      int heightFudge = jumping || hit ? 0 : -16;
+      Image[] images = jumping || hit ? jic : ic;
+      int heightFudge = jumping || hit || dark ? 0 : -16;
       
       int imageIndex = (int)((System.currentTimeMillis() / 200) % images.length);
       g2.drawImage(images[imageIndex],  round(-w/2), heightFudge + round(-h / 2), null);
@@ -90,9 +99,17 @@ public class Player extends PlatformingEntity {
   @Override
   public void collided(Entity with, float tick, Game game, Rectangle2D.Float bounds, Rectangle2D.Float nextBounds, Rectangle2D.Float withBounds) {
     super.collided(with, tick, game, bounds, nextBounds, withBounds);
-    if(with instanceof Flash && hidingIndex == -1) {
+    if(with instanceof Flash && hidingIndex == -1 && !game.dark) {
       hit = true;
       ((Flash)with).successfulHit();
+    } else if(with instanceof LightSwitch) {
+      if(!game.dark) {
+        nextY -= 16;
+        y -= 16;
+      }
+      game.ensureDark();
+    } else if(with instanceof PatrollingTourist && game.dark) {
+      ((PatrollingTourist)with).scare();
     }
   }
   

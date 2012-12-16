@@ -28,7 +28,8 @@ public class Flash extends Entity {
   }
 
   @Override
-  public void render(Graphics2D g) {
+  public void render(Graphics2D g, boolean dark) {
+    if(dark) return;
     if(on ||
        (System.currentTimeMillis()+flashOffset) % 500 < 200) {
       Graphics2D g2 = (Graphics2D)g.create();

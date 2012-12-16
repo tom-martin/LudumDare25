@@ -15,7 +15,7 @@ public abstract class Entity {
   
   public abstract void update(float tick, Game game);
   
-  public abstract void render(Graphics2D g);
+  public abstract void render(Graphics2D g, boolean dark);
   
   public abstract void collided(Entity with, float tick, Game game, Rectangle2D.Float bounds, Rectangle2D.Float nextBounds, Rectangle2D.Float withBounds);
 
