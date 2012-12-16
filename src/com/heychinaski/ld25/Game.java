@@ -13,6 +13,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,8 @@ public class Game extends Canvas {
   List<Tourist> tourists;
   List<Flash> flashes;
   CollisionManager collisionManager = new CollisionManager(this);
+  
+  int levelIndex = 0; 
   
   BackgroundTile bgTile;
   
@@ -166,11 +170,25 @@ public class Game extends Canvas {
         if(t.scared) t.render(g, dark);
       }
       
-      
       g.dispose();
       strategy.show();
       
       if(player.hit && (System.currentTimeMillis() - player.hitTime) > 2000 ) {
+        reset();
+      }
+
+      boolean allTouristsScared = true;
+      for(int i = 0; i < tourists.size(); i++) {
+        Tourist t = tourists.get(i);
+        if(!t.scared) {
+          allTouristsScared = false;
+          break;
+        }
+      }
+      
+      if(allTouristsScared) {
+        // TODO give it a second!
+        levelIndex++;
         reset();
       }
       
@@ -187,6 +205,13 @@ public class Game extends Canvas {
     platforms = new ArrayList<Platform>();
     tourists = new ArrayList<Tourist>();
     flashes = new ArrayList<Flash>();
+    
+    ensureNotDark();
+    
+    Level level = newLevelForIndex();
+    
+    // TODO end screen.
+    if(level == null) System.exit(0);
     
     this.imageManager = new ImageManager(this, "ghost1.png", 
                                                "ghost2.png", 
@@ -228,25 +253,22 @@ public class Game extends Canvas {
                         new Image[]{imageManager.get("ghost_jump_dark.png")});
     camera = new EntityTrackingCamera(player, this);
     
-    player.x = 0;
-    player.nextY = 600;
+    Point2D.Float playerLoc = level.playerStart;
+    player.x = playerLoc.x;
+    player.nextY = playerLoc.y;
     player.w = 16;
     player.h = 16;
     
-    
-//    addPlatform(0, 896, 10000, 128);
-    
-    float y = 800f;
-    addPlatform(0, y, 64, 64);
-    for(int i = 1; i < 20; i++) {
-      y +=((float)Math.random()*128f) - 64;
-      y = Math.min(y, 768);
-      addPlatform(i * 128, y, 64, 64);
+    List<Rectangle2D.Float> levelPlatforms = level.platforms;
+    for(int i = 0; i < levelPlatforms.size(); i++) {
+      Rectangle2D.Float r = levelPlatforms.get(i);
+      addPlatform(r.x + (r.width / 2), r.y + (r.height / 2), r.width, r.height);  
     }
     
-    for(int i = 1; i < 5; i++) {
-      float x = i * 256f;
-      addTourist(x, 0f, x - 32, x + 32);
+    List<Rectangle2D.Float> levelTourists = level.tourists;
+    for(int i = 0; i < levelTourists.size(); i++) {
+      Rectangle2D.Float r = levelTourists.get(i);
+      addTourist((float)r.getCenterX(), r.y, r.x, (float)r.getMaxX());
     }
     
     entities.add(player);
@@ -255,7 +277,7 @@ public class Game extends Canvas {
       entities.get(i).applyNext();
     }
     
-    setLightSwitch(128, 736);
+    setLightSwitch(level.lightSwitch.x, level.lightSwitch.y);
     ensureNotDark();
   }
 
@@ -318,6 +340,14 @@ public class Game extends Canvas {
   public void ensureNotDark() {
     if(dark) {
       dark = false;
+    }
+  }
+  
+  private Level newLevelForIndex() {
+    switch(levelIndex) {
+     case 0: return new Level1();
+     case 1: return new Level1();
+     default: return null;
     }
   }
 

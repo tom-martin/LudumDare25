@@ -17,7 +17,7 @@ public class PatrollingTourist extends Tourist {
   private long scaredStart;
   
   static float WALK_SPEED = 30f;
-  static float SCARED_WALK_SPEED = 100f;
+  static float SCARED_WALK_SPEED = 120f;
   static float SCARE_JUMP_SPEED = GRAVITY_SPEED + 300f;
   
   public PatrollingTourist(Image walkImages[], Image darkImages[], Image scaredImages[], float left, float right) {
@@ -39,6 +39,8 @@ public class PatrollingTourist extends Tourist {
       }
       
       if(game.dark && !scared) return;
+      
+      if(scared && ((int)(Math.random() * 100)) == 0) direction *= -1;
       
       float speed = scared ? (Math.min(SCARED_WALK_SPEED, scaredDiff / 5)): WALK_SPEED;
       nextX = x + (direction * tick * speed);
