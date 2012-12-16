@@ -27,13 +27,17 @@ public class Player extends PlatformingEntity {
   private Image[] darkImageCycle;
   private Image[] darkJumpCycle;
   long hitTime;
+  private long hideStart = -1;
+  private Image changeImage;
+  private long hideEnd;
   
-  public Player(Image[] imageCycle, Image[] jumpCycle, Image hideImages[], Image[] darkImageCycle, Image[] darkJumpCycle) {
+  public Player(Image[] imageCycle, Image[] jumpCycle, Image hideImages[], Image[] darkImageCycle, Image[] darkJumpCycle, Image changeImage) {
     this.imageCycle = imageCycle;
     this.darkImageCycle = darkImageCycle;
     this.jumpCycle = jumpCycle;
     this.darkJumpCycle = darkJumpCycle;
     this.hideImages = hideImages;
+    this.changeImage = changeImage;
   }
   
   @Override
@@ -56,7 +60,9 @@ public class Player extends PlatformingEntity {
     
     if(game.input.isKeyDown(KeyEvent.VK_Z) && !game.dark) {
       if(hidingIndex  == -1) {
+        hideStart  = System.currentTimeMillis();
         hidingIndex = (int)(Math.random() * hideImages.length);
+        game.playHideSound();
       }
       
    // CHEAT MODE!
@@ -65,9 +71,15 @@ public class Player extends PlatformingEntity {
       }
     }
     
-    if(!game.input.isKeyDown(KeyEvent.VK_D)) hidingIndex = -1;
+    if(!game.input.isKeyDown(KeyEvent.VK_D)) {
+      if(hidingIndex != -1) {
+        hideEnd = System.currentTimeMillis();
+      }
+      hidingIndex = -1;
+    }
     
     if(game.input.isKeyDown(KeyEvent.VK_SPACE) && jumpFuel > 0) {
+      if(!jumping) game.playJumpSound();
       jumping = true;
       float cost = (jumpFuel / INITIAL_JUMP_FUEL);
       float jumpValue = Math.min((tick * JUMP_SPEED * cost), jumpFuel);
@@ -96,6 +108,11 @@ public class Player extends PlatformingEntity {
     Graphics2D g2 = (Graphics2D)g.create();
     g2.translate(round(x), round(y));
     if(hidingIndex == -1) {
+      if(System.currentTimeMillis() - hideEnd < 150) {
+        g2.drawImage(changeImage,  round(-w/2), round(-(h / 2) - 16), null);
+        return;
+      }
+      
       g2.scale(direction, 1);
       Image[] images = jumping ? jic : ic;
       int heightFudge = jumping || dark ? 0 : -16;
@@ -103,7 +120,11 @@ public class Player extends PlatformingEntity {
       int imageIndex = (int)((System.currentTimeMillis() / 200) % images.length);
       g2.drawImage(images[imageIndex],  round(-w/2), heightFudge + round(-h / 2), null);
     } else {
-      g2.drawImage(hideImages[hidingIndex],  round(-w/2), round(-(h / 2) - 16), null);
+      if(System.currentTimeMillis() - hideStart < 150) {
+        g2.drawImage(changeImage,  round(-w/2), round(-(h / 2) - 16), null);
+      } else {
+        g2.drawImage(hideImages[hidingIndex],  round(-w/2), round(-(h / 2) - 16), null);        
+      }
     }
 //    g2.setColor(Color.red);
 //    g2.drawRect(round(-w/2), round(-h / 2), round(w), round(h));
@@ -118,6 +139,7 @@ public class Player extends PlatformingEntity {
         hit = true;
         ((Flash)with).successfulHit();
         hitTime = System.currentTimeMillis();
+        game.playClickSound();
       }
     } else if(with instanceof LightSwitch) {
       if(!game.dark) {
@@ -126,6 +148,10 @@ public class Player extends PlatformingEntity {
       }
       game.ensureDark();
     } else if(with instanceof PatrollingTourist && game.dark) {
+      if(!((PatrollingTourist)with).scared) {
+        game.playScareSound();
+        game.playScaredSoundDelayed();
+      }
       ((PatrollingTourist)with).scare();
     }
   }

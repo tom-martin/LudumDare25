@@ -24,7 +24,7 @@ public class Flash extends Entity {
   @Override
   public void update(float tick, Game game) {
     nextX = tourist.nextX + (24 * tourist.direction);
-    nextY = tourist.nextY;
+    nextY = tourist.y;
   }
 
   @Override

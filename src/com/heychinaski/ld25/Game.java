@@ -1,5 +1,6 @@
 package com.heychinaski.ld25;
 
+import static java.lang.Math.random;
 import static java.lang.Math.round;
 
 import java.awt.Canvas;
@@ -18,6 +19,10 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class Game extends Canvas {
   private static final long serialVersionUID = 1L;
@@ -55,6 +60,10 @@ public class Game extends Canvas {
   private long levelStart;
 
   private boolean showingTitle = false;
+
+  private long timeToPlayScaredSound = -1;
+
+  private Clip musicClip;
   
   public Game() {
     setIgnoreRepaint(true);
@@ -115,6 +124,7 @@ public class Game extends Canvas {
   public void start() {
     createBufferStrategy(2);
     BufferStrategy strategy = getBufferStrategy();
+    playMusic();
     
     Graphics2D g;
     reset();
@@ -149,6 +159,15 @@ public class Game extends Canvas {
       
       if(input.isKeyDown(KeyEvent.VK_ESCAPE)) {
         System.exit(0);
+      }
+      
+      if(input.isKeyDown(KeyEvent.VK_M)) {
+        if(musicClip.isRunning()) {
+          musicClip.stop();
+        } else {
+          playMusic();
+        }
+        input.keyUp(KeyEvent.VK_M);
       }
       
       for(int i = 0; i < entities.size(); i++) {
@@ -255,6 +274,10 @@ public class Game extends Canvas {
         reset();
       }
       
+      if(timeToPlayScaredSound > 0 && System.currentTimeMillis() > timeToPlayScaredSound) {
+        playScaredSound();
+      }
+      
       try {
         Thread.sleep(5);
       } catch (InterruptedException e) {
@@ -311,7 +334,8 @@ public class Game extends Canvas {
                                                "switch.png",
                                                "switch_dark.png",
                                                "font.png",
-                                               "sign.png");
+                                               "sign.png",
+                                               "change.png");
     
     bgTile = new BackgroundTile(imageManager.get("wallpaper.png"), imageManager.get("wallpaper2.png"), imageManager.get("wallpaper_dark.png"), imageManager.get("wallpaper_dark.png"));
     
@@ -319,7 +343,8 @@ public class Game extends Canvas {
                         new Image[]{imageManager.get("ghost_jump.png")},
                         new Image[]{imageManager.get("clock.png"), imageManager.get("flower.png"), imageManager.get("hatstand.png")},
                         new Image[]{imageManager.get("ghost1_dark.png"), imageManager.get("ghost2_dark.png"), imageManager.get("ghost3_dark.png"), imageManager.get("ghost2_dark.png")},
-                        new Image[]{imageManager.get("ghost_jump_dark.png")});
+                        new Image[]{imageManager.get("ghost_jump_dark.png")},
+                        imageManager.get("change.png"));
     camera = new EntityTrackingCamera(player, this);
     
     font = new Font(imageManager.get("font.png"));
@@ -413,6 +438,7 @@ public class Game extends Canvas {
 
   public void ensureDark() {
     if(!dark) {
+      playSwitchSound();
       dark = true;
     }
   }
@@ -434,5 +460,59 @@ public class Game extends Canvas {
      default: return null;
     }
   }
+  
+  public synchronized void playSwitchSound() {
+    playSound("/switch.wav");
+  }
+  
+  public synchronized void playJumpSound() {
+    playSound("/jump" + randomInt(3) + ".wav");
+  }
+  
+  public synchronized void playHideSound() {
+    playSound("/hide" + randomInt(3) + ".wav");
+  }
+  
+  public synchronized void playScareSound() {
+    playSound("/scare" + randomInt(3) + ".wav");
+  }
+  
+  public synchronized void playScaredSoundDelayed() {
+    timeToPlayScaredSound = System.currentTimeMillis() + 200;
+  }
+  
+  public synchronized void playScaredSound() {
+    playSound("/scared" + randomInt(3) + ".wav");
+    timeToPlayScaredSound = -1;
+  }
+  
+  public synchronized void playClickSound() {
+    playSound("/click.wav");
+  }
+  
+  public synchronized void playMusic() {
+    musicClip = playSound("/music1.wav", true);
+  }
+  
+  private void playSound(String soundLoc) {
+    playSound(soundLoc, false);
+  }
+  
+  private Clip playSound(String soundLoc, boolean loop) {
+    try {
+      Clip clip = AudioSystem.getClip();
+      AudioInputStream inputStream = AudioSystem.getAudioInputStream(Game.this.getClass().getResourceAsStream(soundLoc));
+      clip.open(inputStream);
+      if(loop) clip.loop(Clip.LOOP_CONTINUOUSLY);
+      clip.start(); 
+      
+      return clip;
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+      return null;
+    }
+  }
+  
+  public static int randomInt(int max) { return (int)(random() * max);}
 
 }

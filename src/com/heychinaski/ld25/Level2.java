@@ -23,6 +23,9 @@ public class Level2 extends Level {
     signs = new ArrayList<Sign>();
     signs.add(new Sign(64, -16, new String[] {"USE THE SPACEBAR", 
                                               "TO JUMP."}, new String[]  {"SCARE ALL THE TOURISTS", "TO COMPLETE EACH LEVEL"}));
+    
+    signs.add(new Sign(336, -16, new String[] {"TOGGLE THE MUSIC", 
+                                              "WITH THE 'M' KEY."}, new String[]  {"SCARE ALL THE TOURISTS", "TO COMPLETE EACH LEVEL"}));
   }
 
   private Rectangle2D.Float rect(int left, int top, int right, int bottom) {
