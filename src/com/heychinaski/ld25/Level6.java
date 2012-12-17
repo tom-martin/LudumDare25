@@ -31,8 +31,15 @@ public class Level6 extends Level {
     tourists.add(rect(480, -96, 544, -96));
     tourists.add(rect(768, -96, 831, -96));
     
-    lightSwitch = new Point2D.Float(704, -144);
+    lightSwitch = new Point2D.Float(672, -144);
     signs = new ArrayList<Sign>();
+    
+    furniture = new ArrayList<Point2D.Float>();
+    furniture.add(new Point2D.Float(16, -32));
+    furniture.add(new Point2D.Float(96, -32));
+    furniture.add(new Point2D.Float(378, -32));
+    furniture.add(new Point2D.Float(688, -160));
+    furniture.add(new Point2D.Float(784, 96));
   }
 
   private Rectangle2D.Float rect(int left, int top, int right, int bottom) {

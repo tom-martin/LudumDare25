@@ -10,4 +10,5 @@ public abstract class Level {
   List<Rectangle2D.Float> tourists;
   Point2D.Float lightSwitch;
   List<Sign> signs;
+  List<Point2D.Float> furniture;
 }

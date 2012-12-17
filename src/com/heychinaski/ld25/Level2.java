@@ -26,6 +26,11 @@ public class Level2 extends Level {
     
     signs.add(new Sign(336, -16, new String[] {"TOGGLE THE MUSIC", 
                                               "WITH THE 'M' KEY."}, new String[]  {"SCARE ALL THE TOURISTS", "TO COMPLETE EACH LEVEL"}));
+    
+    furniture = new ArrayList<Point2D.Float>();
+    furniture.add(new Point2D.Float(-24, -32));
+    furniture.add(new Point2D.Float(272, -32));
+    furniture.add(new Point2D.Float(232, -32));
   }
 
   private Rectangle2D.Float rect(int left, int top, int right, int bottom) {

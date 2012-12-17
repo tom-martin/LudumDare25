@@ -17,6 +17,8 @@ import java.awt.event.MouseListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferStrategy;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +38,7 @@ public class Game extends Canvas {
   List<Tourist> tourists;
   List<Flash> flashes;
   List<Sign> signs;
+  List<Furniture> furnitures;
   CollisionManager collisionManager = new CollisionManager(this);
   Font font;
   
@@ -135,10 +138,11 @@ public class Game extends Canvas {
       float tick = (float)(now - last) / 1000;
       if(tick > biggestTick) {
         biggestTick = tick;
-        System.out.println("Biggest"+(((float)1) / biggestTick));
+//        System.out.println("Biggest"+(((float)1) / biggestTick));
       }
       if(System.currentTimeMillis()%100==0) {
-        System.out.println(((float)1) / tick);
+//        System.out.println(((float)1) / tick);
+        System.out.println(""+player.x+", "+player.y);
       }
       last = now;
       
@@ -147,7 +151,6 @@ public class Game extends Canvas {
       } else {
         showingTitle = false;
       }
-      if(now - levelStart < 200) input.keyUp(KeyEvent.VK_SPACE);
       
       if(showingTitle) {
         input.keyUp(KeyEvent.VK_SPACE);
@@ -206,6 +209,10 @@ public class Game extends Canvas {
         platforms.get(i).render(g, dark);
       }
       
+      for(int i = 0; i < furnitures.size(); i++) {
+        furnitures.get(i).render(g, dark );
+      }
+      
       for(int i = 0; i < signs.size(); i++) {
         signs.get(i).render(g, dark );
       }
@@ -246,11 +253,11 @@ public class Game extends Canvas {
         
         if(levelIndex < MAX_LEVEL_INDEX) {
           font.renderString(g, "LEVEL COMPLETE!", startX, startY + (10));
-          font.renderString(g, "PRESS SPACE TO", startX, startY + (20));
+          font.renderString(g, "PRESS ENTER TO", startX, startY + (20));
           font.renderString(g, "CONTINUE.", startX, startY + (30));
         } else {
           font.renderString(g, "GAME COMPLETE!", startX, startY + (10));
-          font.renderString(g, "PRESS SPACE TO", startX, startY + (20));
+          font.renderString(g, "PRESS ENTER TO", startX, startY + (20));
           font.renderString(g, "PLAY AGAIN!", startX, startY + (30));
         }
       }
@@ -266,7 +273,7 @@ public class Game extends Canvas {
         finishTime = System.currentTimeMillis();
       }
       
-      if(allTouristsScared && (System.currentTimeMillis() - finishTime) > 500 && input.isKeyDown(KeyEvent.VK_SPACE)) {
+      if(allTouristsScared && (System.currentTimeMillis() - finishTime) > 500 && input.isKeyDown(KeyEvent.VK_ENTER)) {
         levelIndex++;
         if(levelIndex > MAX_LEVEL_INDEX) {
           levelIndex = 0;
@@ -294,6 +301,7 @@ public class Game extends Canvas {
     tourists = new ArrayList<Tourist>();
     flashes = new ArrayList<Flash>();
     signs = new ArrayList<Sign>();
+    furnitures = new ArrayList<Furniture>();
     
     ensureNotDark();
     finishTime = -1;
@@ -311,9 +319,17 @@ public class Game extends Canvas {
                                                "ghost3_dark.png",
                                                "ghost_jump.png",
                                                "ghost_jump_dark.png",
-                                               "clock.png", 
-                                               "flower.png", 
-                                               "hatstand.png", 
+                                               "clock.png",
+                                               "clock_dark.png", 
+                                               "flower.png",
+                                               "flower_dark.png",
+                                               "hatstand.png",
+                                               "hatstand_dark.png",
+                                               "bookcase.png",
+                                               "bookcase_dark.png",
+                                               "bookcase_small.png",
+                                               "goat.png",
+                                               "goat_dark.png",
                                                "tourist1.png", 
                                                "tourist2.png",
                                                "tourist1_dark.png",
@@ -331,17 +347,24 @@ public class Game extends Canvas {
                                                "wallpaper.png",
                                                "wallpaper2.png",
                                                "wallpaper_dark.png",
+                                               "wallpaper2_dark.png",
                                                "switch.png",
                                                "switch_dark.png",
                                                "font.png",
                                                "sign.png",
+                                               "sign_dark.png",
                                                "change.png");
     
-    bgTile = new BackgroundTile(imageManager.get("wallpaper.png"), imageManager.get("wallpaper2.png"), imageManager.get("wallpaper_dark.png"), imageManager.get("wallpaper_dark.png"));
+    bgTile = new BackgroundTile(imageManager.get("wallpaper.png"), imageManager.get("wallpaper2.png"), imageManager.get("wallpaper_dark.png"), imageManager.get("wallpaper2_dark.png"));
+    
+    Image[] furnitureImages = new Image[]{imageManager.get("clock.png"), imageManager.get("flower.png"), imageManager.get("hatstand.png"), imageManager.get("bookcase.png"), imageManager.get("goat.png")};
+    Image[] darkFurnitureImages = new Image[]{imageManager.get("clock_dark.png"), imageManager.get("flower_dark.png"), imageManager.get("hatstand_dark.png"), imageManager.get("bookcase_dark.png"), imageManager.get("goat_dark.png") };
+    
+    Image[] hideImages = new Image[]{imageManager.get("clock.png"), imageManager.get("flower.png"), imageManager.get("hatstand.png"), imageManager.get("bookcase_small.png"), imageManager.get("goat.png")};
     
     player = new Player(new Image[]{imageManager.get("ghost1.png"), imageManager.get("ghost2.png"), imageManager.get("ghost3.png"), imageManager.get("ghost2.png")},
                         new Image[]{imageManager.get("ghost_jump.png")},
-                        new Image[]{imageManager.get("clock.png"), imageManager.get("flower.png"), imageManager.get("hatstand.png")},
+                        hideImages,
                         new Image[]{imageManager.get("ghost1_dark.png"), imageManager.get("ghost2_dark.png"), imageManager.get("ghost3_dark.png"), imageManager.get("ghost2_dark.png")},
                         new Image[]{imageManager.get("ghost_jump_dark.png")},
                         imageManager.get("change.png"));
@@ -354,6 +377,12 @@ public class Game extends Canvas {
     player.nextY = playerLoc.y;
     player.w = 16;
     player.h = 16;
+    
+    List<Point2D.Float> levelFurniture = level.furniture;
+    for(int i = 0; i < levelFurniture.size(); i++) {
+      Point2D.Float point = levelFurniture.get(i);
+      addFurniture(point.x, point.y, furnitureImages, darkFurnitureImages);
+    }
     
     List<Rectangle2D.Float> levelPlatforms = level.platforms;
     for(int i = 0; i < levelPlatforms.size(); i++) {
@@ -372,6 +401,7 @@ public class Game extends Canvas {
       Sign newSign = new Sign(round(sign.nextX), round(sign.nextY), sign.message, sign.darkMessage);
       newSign.font = font;
       newSign.image = imageManager.get("sign.png");
+      newSign.darkImage = imageManager.get("sign_dark.png");
       signs.add(newSign);
       entities.add(newSign);
     }
@@ -384,6 +414,14 @@ public class Game extends Canvas {
     
     setLightSwitch(level.lightSwitch.x, level.lightSwitch.y);
     ensureNotDark();
+  }
+
+  private void addFurniture(float x, float y, Image[] furnitureImages, Image[] darkFurnitureImages) {
+    Furniture furniture = new Furniture(furnitureImages, darkFurnitureImages);
+    furniture.nextX = x;
+    furniture.nextY = y;
+    entities.add(furniture);
+    furnitures.add(furniture);
   }
 
   private void addPlatform(float x, float y, float w, float h) {
@@ -501,7 +539,11 @@ public class Game extends Canvas {
   private Clip playSound(String soundLoc, boolean loop) {
     try {
       Clip clip = AudioSystem.getClip();
-      AudioInputStream inputStream = AudioSystem.getAudioInputStream(Game.this.getClass().getResourceAsStream(soundLoc));
+      // read audio data from whatever source (file/classloader/etc.)
+      InputStream audioSrc = Game.this.getClass().getResourceAsStream(soundLoc);
+      //add buffer for mark/reset support
+      InputStream bufferedIn = new BufferedInputStream(audioSrc);
+      AudioInputStream inputStream = AudioSystem.getAudioInputStream(bufferedIn);
       clip.open(inputStream);
       if(loop) clip.loop(Clip.LOOP_CONTINUOUSLY);
       clip.start(); 

@@ -11,6 +11,7 @@ public class Sign extends Entity {
   
   Font font = null;
   Image image = null;
+  Image darkImage = null;
   String[] message;
   private long lastActivated;
   
@@ -34,7 +35,11 @@ public class Sign extends Entity {
 
   @Override
   public void render(Graphics2D g, boolean dark) {
-    g.drawImage(image, round(x - (w / 2)), round(y - (h / 2)), null);
+    if(dark) {
+      g.drawImage(darkImage, round(x - (w / 2)), round(y - (h / 2)), null);
+    } else {
+      g.drawImage(image, round(x - (w / 2)), round(y - (h / 2)), null);
+    }
   }
   
   public void renderMessage(Graphics2D g, Camera camera, boolean dark) {

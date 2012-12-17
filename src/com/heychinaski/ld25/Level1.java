@@ -23,6 +23,9 @@ public class Level1 extends Level {
     signs.add(new Sign(0, -16, new String[] {"USE THE LEFT AND RIGHT", "ARROW KEYS TO MOVE."}, null));
     signs.add(new Sign(64, -16, new String[] {"DON'T LET THE TOURISTS", "TAKE YOUR PICTURE!", "USE THE 'Z' KEY", "TO HIDE FROM THEM!"}, new String[]  {"SCARE ALL THE TOURISTS", "TO COMPLETE EACH LEVEL"}));
     signs.add(new Sign(352, -16, new String[] {"TOUCH THE SWITCH TO", "TURN OUT THE LIGHTS."}, new String[]  {"NOW YOU CAN SCARE", "AWAY THE TOURISTS!"}));
+    
+    furniture = new ArrayList<Point2D.Float>();
+    furniture.add(new Point2D.Float(224, -32));
   }
 
   private Rectangle2D.Float rect(int left, int top, int right, int bottom) {

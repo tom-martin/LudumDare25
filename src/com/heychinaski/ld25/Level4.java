@@ -30,6 +30,12 @@ public class Level4 extends Level {
     
     lightSwitch = new Point2D.Float(544, -240);
     signs = new ArrayList<Sign>();
+    
+    furniture = new ArrayList<Point2D.Float>();
+    furniture.add(new Point2D.Float(72, -32));
+    furniture.add(new Point2D.Float(248, -32));
+    furniture.add(new Point2D.Float(544, -32));
+    furniture.add(new Point2D.Float(456, -256));
   }
 
   private Rectangle2D.Float rect(int left, int top, int right, int bottom) {

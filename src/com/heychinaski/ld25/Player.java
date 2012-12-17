@@ -66,9 +66,9 @@ public class Player extends PlatformingEntity {
       }
       
    // CHEAT MODE!
-      if(!game.input.isKeyDown(KeyEvent.VK_D)) {
+//      if(!game.input.isKeyDown(KeyEvent.VK_D)) {
        return;
-      }
+//      }
     }
     
     if(!game.input.isKeyDown(KeyEvent.VK_D)) {
